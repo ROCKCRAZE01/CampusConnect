@@ -112,7 +112,7 @@ public class CreateDepartmentFragment extends Fragment {
                     return;
                 }
 
-                boolean success = dbHelper.createDepartmentWithDirector(deptName, deptCode, directorId);
+                boolean success = dbHelper.createDepartmentWithDirector(deptName, deptCode, directorId, 0);
                 Toast.makeText(getContext(), success ? "Department Created!" : "Director must be a Professor!", Toast.LENGTH_SHORT).show();
 
             } else if (selectedEntity.equals("Club")) {

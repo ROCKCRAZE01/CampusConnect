@@ -20,7 +20,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Table Names
     private static final String TABLE_USERS = "Users";
     private static final String TABLE_DEPARTMENTS = "Departments";
-    private static final String TABLE_DEPARTMENT_DIRECTORS = "Department_Directors";
+    private static final String TABLE_DEPARTMENT_DIRECTORS = "DepartmentDirectors";
     private static final String TABLE_CLUB_FACULTY_ADVISORS = "Club_Faculty_Advisors";
     private static final String TABLE_ROLES = "Roles";
     private static final String TABLE_ROLE_PERMISSIONS = "Role_Permissions";
@@ -160,6 +160,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLUBS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLUB_FACULTY_ADVISORS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ANNOUNCEMENTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_DEPARTMENT_MEMBERS);
+
         onCreate(db);
     }
 
@@ -284,16 +286,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Method to create a department and assign director (only if baseRole = Professor)
-    public boolean createDepartmentWithDirector(String deptName, String deptCode, int userId) {
+    public boolean createDepartmentWithDirector(String deptName, String deptCode, int userId, int parentId) {
         if (!isUserProfessor(userId)) return false;
 
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
+//        db.execSQL("CREATE TABLE " + TABLE_DEPARTMENTS + " (" +
+//                "department_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+//                "dept_code TEXT UNIQUE NOT NULL, "+
+//                "parent_id INTEGER, "+
+//                "name TEXT UNIQUE NOT NULL, "+
+//                "FOREIGN KEY (parent_id) REFERENCES " + TABLE_DEPARTMENTS + "(department_id));");
 
         try {
             ContentValues deptValues = new ContentValues();
             deptValues.put("dept_code", deptCode);
             deptValues.put("name", deptName);
+            deptValues.put("parent_id", parentId!=0?parentId:null); // Set parent_id if provided, otherwise null (for top-level departments)");
 
             long deptId = db.insert(TABLE_DEPARTMENTS, null, deptValues);
 
