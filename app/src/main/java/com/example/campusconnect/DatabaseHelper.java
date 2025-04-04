@@ -9,6 +9,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "campus_connect.db";
@@ -21,6 +24,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_ROLES = "Roles";
     private static final String TABLE_ROLE_PERMISSIONS = "Role_Permissions";
     private static final String TABLE_USER_ROLES = "User_Roles";
+    private static final String TABLE_CLUBS = "Clubs";
+    private static final String TABLE_ANNOUNCEMENTS = "Announcements";
 
 
     // Column Names - Users
@@ -56,6 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Create Departments Table
         db.execSQL("CREATE TABLE " + TABLE_DEPARTMENTS + " (" +
                 "department_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "dept_code TEXT UNIQUE NOT NULL, "+
                 "name TEXT UNIQUE NOT NULL);");
 
         // Create Department Directors Table (Users can be directors of multiple departments)
@@ -89,6 +95,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY (role_id) REFERENCES " + TABLE_ROLES + "(role_id), " +
                 "FOREIGN KEY (department_id) REFERENCES " + TABLE_DEPARTMENTS + "(department_id), " +
                 "PRIMARY KEY (user_id, role_id, department_id));");
+
+        // Table - Announcements
+        db.execSQL("CREATE TABLE " + TABLE_ANNOUNCEMENTS + " (" +
+                "announcement_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "title TEXT NOT NULL, " +
+                "description TEXT NOT NULL, " +
+                "created_by INTEGER, " +
+                "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+                "FOREIGN KEY (created_by) REFERENCES Users(user_id));");
+
+        db.execSQL("CREATE TABLE " + TABLE_CLUBS + " (" +
+                "club_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "club_code TEXT UNIQUE NOT NULL, "+
+                "name TEXT UNIQUE NOT NULL, " +
+                "faculty_advisor INTEGER, " +
+                "FOREIGN KEY (faculty_advisor) REFERENCES Users(user_id));");
+
     }
 
     @Override
@@ -100,8 +123,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_DEPARTMENT_DIRECTORS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_DEPARTMENTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLUBS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ANNOUNCEMENTS);
         onCreate(db);
     }
+
+
+
+
 
     // **Method to Register a New User**
     public boolean registerUser(String name, String email, String password, String baseRole) {
@@ -190,6 +219,142 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return approveStatus;
     }
+
+    // Method to check if a user is a Professor
+    public boolean isUserProfessor(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT baseRole FROM Users WHERE user_id = ?", new String[]{String.valueOf(userId)});
+        boolean isProfessor = false;
+
+        if (cursor.moveToFirst()) {
+            String baseRole = cursor.getString(0);
+            if ("Professor".equalsIgnoreCase(baseRole)) {
+                isProfessor = true;
+            }
+        }
+
+        cursor.close();
+        db.close();
+        return isProfessor;
+    }
+
+    // Method to create a department and assign director (only if baseRole = Professor)
+    public boolean createDepartmentWithDirector(String deptName, String deptCode, int userId) {
+        if (!isUserProfessor(userId)) return false;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+
+        try {
+            ContentValues deptValues = new ContentValues();
+            deptValues.put("dept_code", deptCode);
+            deptValues.put("name", deptName);
+
+            long deptId = db.insert(TABLE_DEPARTMENTS, null, deptValues);
+
+            if (deptId == -1) {
+                db.endTransaction();
+                return false;
+            }
+
+            ContentValues directorValues = new ContentValues();
+            directorValues.put("user_id", userId);
+            directorValues.put("department_id", deptId);
+            long result = db.insert(TABLE_DEPARTMENT_DIRECTORS, null, directorValues);
+
+            if (result == -1) {
+                db.endTransaction();
+                return false;
+            }
+
+            db.setTransactionSuccessful();
+            return true;
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+    public boolean createClub(String clubName, int facultyAdvisorId) {
+        if (!isUserProfessor(facultyAdvisorId)) return false;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("name", clubName);
+        values.put("faculty_advisor", facultyAdvisorId);
+
+        long result = db.insert(TABLE_CLUBS, null, values);
+        db.close();
+        return result != -1;
+    }
+    public boolean deleteDepartment(String deptCode) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            // Get the department_id based on deptCode
+            Cursor cursor = db.rawQuery("SELECT department_id FROM Departments WHERE dept_code = ?", new String[]{deptCode});
+            if (!cursor.moveToFirst()) {
+                cursor.close();
+                return false; // Department not found
+            }
+
+            int departmentId = cursor.getInt(0);
+            cursor.close();
+
+            // Delete from User_Roles
+            db.delete("User_Roles", "department_id = ?", new String[]{String.valueOf(departmentId)});
+
+            // Delete Role_Permissions linked to roles in this department
+            db.execSQL("DELETE FROM Role_Permissions WHERE role_id IN (SELECT role_id FROM Roles WHERE department_id = ?)", new Object[]{departmentId});
+
+            // Delete from Roles
+            db.delete("Roles", "department_id = ?", new String[]{String.valueOf(departmentId)});
+
+            // Delete from Department_Directors
+            db.delete("Department_Directors", "department_id = ?", new String[]{String.valueOf(departmentId)});
+
+            // Finally, delete from Departments
+            int rowsAffected = db.delete("Departments", "department_id = ?", new String[]{String.valueOf(departmentId)});
+
+            if (rowsAffected > 0) {
+                db.setTransactionSuccessful();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+        }
+        return false;
+    }
+
+    public boolean createAnnouncement(String title, String description, int createdBy) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("title", title);
+        values.put("description", description);
+        values.put("created_by", createdBy);
+
+        long result = db.insert("Announcements", null, values);
+        return result != -1;
+    }
+
+    public List<String> getAllAnnouncements() {
+        List<String> announcements = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT title, description, timestamp FROM Announcements ORDER BY timestamp DESC", null);
+        if (cursor.moveToFirst()) {
+            do {
+                String title = cursor.getString(0);
+                String desc = cursor.getString(1);
+                String time = cursor.getString(2);
+                announcements.add("📢 " + title + "\n" + desc + "\n🕒 " + time);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return announcements;
+    }
+
+
 
 }
 

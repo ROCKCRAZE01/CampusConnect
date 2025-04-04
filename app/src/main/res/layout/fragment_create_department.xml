@@ -1,67 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <Spinner
+        android:id="@+id/spinnerEntity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Spinner
+        android:id="@+id/spinnerOperation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/layoutDepartment"
         android:orientation="vertical"
-        android:padding="16dp">
-
-        <EditText
-            android:id="@+id/etDeptId"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Department ID"/>
-
-        <EditText
-            android:id="@+id/etDeptName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Department Name"/>
-
-        <Button
-            android:id="@+id/btnAddDept"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add Department"/>
-
-        <Button
-            android:id="@+id/btnModifyDept"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Modify Department"/>
-
-        <Button
-            android:id="@+id/btnDeleteDept"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Delete Department"/>
-
-        <EditText
-            android:id="@+id/etUsername"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Username"/>
-
-        <EditText
-            android:id="@+id/etRole"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Role"/>
-
-        <Button
-            android:id="@+id/btnAssignDirector"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Assign Director"/>
-
-        <Button
-            android:id="@+id/btnAddUser"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Add User"/>
-
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <EditText android:id="@+id/etDeptCode" android:hint="Department Code" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+        <EditText android:id="@+id/etDeptName" android:hint="Department Name" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+        <EditText android:id="@+id/etDirector" android:hint="Director ID" android:layout_height="wrap_content" android:layout_width="match_parent"/>
     </LinearLayout>
-</ScrollView>
+
+    <LinearLayout
+        android:id="@+id/layoutClub"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <EditText android:id="@+id/etClubName" android:hint="Club Name" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+        <EditText android:id="@+id/etFacultyAdvisor" android:hint="Faculty Advisor ID" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+    </LinearLayout>
+
+    <Button android:id="@+id/btnCreate" android:text="Create" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+    <Button android:id="@+id/btnModify" android:text="Modify" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+    <Button android:id="@+id/btnDelete" android:text="Delete" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+</LinearLayout>

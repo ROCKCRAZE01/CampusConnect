@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">CampusConnect</string>
+    <string-array name="operations_array">
+        <item>Select Operation</item>
+        <item>Create</item>
+        <item>Modify</item>
+        <item>Delete</item>
+    </string-array>
+    <string-array name="entity_array">
+        <item>Select Entity</item>
+        <item>Department</item>
+        <item>Club</item>
+    </string-array>
 </resources>

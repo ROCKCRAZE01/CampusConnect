@@ -36,6 +36,8 @@ public class SuperAdminActivity extends AppCompatActivity {
                     case 1:
                         tab.setText("Approve User"); // Placeholder for next tab
                         break;
+                    case 2:
+                        tab.setText("Announcements"); // Placeholder for next tab
                 }
             }
         }).attach();

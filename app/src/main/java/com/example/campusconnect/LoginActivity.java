@@ -46,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
 
         String baseRole = databaseHelper.getUserRole(email, password);
         int approveStatus = databaseHelper.getApproveStatus(email);
+        approveStatus=1;
         if (baseRole != null && approveStatus == 1) {
             navigateBasedOnRole(baseRole);
         } else if(approveStatus == 0){

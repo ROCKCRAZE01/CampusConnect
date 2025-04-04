@@ -20,6 +20,8 @@ public class SuperAdminPagerAdapter extends FragmentStateAdapter {
                 return new CreateDepartmentFragment();
             case 1:
                 return new ApproveUserFragment(); // Placeholder for additional tab
+            case 2:
+                return new SuperAdminAnnouncementsFragment(); // Placeholder for additional tab
             default:
                 return new CreateDepartmentFragment();
         }
@@ -27,6 +29,6 @@ public class SuperAdminPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2; // Update this number when adding more tabs
+        return 3; // Update this number when adding more tabs
     }
 }
