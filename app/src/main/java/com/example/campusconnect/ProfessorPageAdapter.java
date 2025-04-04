@@ -17,14 +17,19 @@ public class ProfessorPageAdapter extends FragmentStateAdapter {
             case 0:
                 return new ProfessorAnnouncementFragment();
             case 1:
+                return new ProfessorDepartmentFragment();
+            case 2:
+                return new ApproveUserFragment();
+            case 3:
                 return new LogoutFragment();
+
             default:
-                return new CreateDepartmentFragment();
+                return new ProfessorAnnouncementFragment();
         }
     }
 
     @Override
     public int getItemCount() {
-        return 2;
+        return 4;
     }
 }

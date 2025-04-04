@@ -27,7 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_USER_ROLES = "User_Roles";
     private static final String TABLE_CLUBS = "Clubs";
     private static final String TABLE_ANNOUNCEMENTS = "Announcements";
-
+    private static final String TABLE_DEPARTMENT_MEMBERS = "DepartmentMembers";
 
     // Column Names - Users
     private static final String COLUMN_USER_ID = "user_id";
@@ -63,7 +63,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + TABLE_DEPARTMENTS + " (" +
                 "department_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "dept_code TEXT UNIQUE NOT NULL, "+
-                "name TEXT UNIQUE NOT NULL);");
+                "parent_id INTEGER, "+
+                "name TEXT UNIQUE NOT NULL, "+
+                "FOREIGN KEY (parent_id) REFERENCES " + TABLE_DEPARTMENTS + "(department_id));");
+
+        db.execSQL("CREATE TABLE  " + TABLE_DEPARTMENT_MEMBERS + " (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "department_id INTEGER, " +
+                "user_id INTEGER, " +
+                "role TEXT, " + // e.g., "member", "hod", "coordinator"
+                "FOREIGN KEY (department_id) REFERENCES " + TABLE_DEPARTMENTS + "(department_id), " +
+                "FOREIGN KEY (user_id) REFERENCES Users(user_id));");
+
 
         // Create Department Directors Table (Users can be directors of multiple departments)
         db.execSQL("CREATE TABLE " + TABLE_DEPARTMENT_DIRECTORS + " (" +

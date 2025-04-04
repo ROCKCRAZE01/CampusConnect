@@ -32,9 +32,17 @@ public class ProfessorActivity extends AppCompatActivity {
                         tab.setText("Announcements");
                         break;
                     case 1:
-                        tab.setText("Logout"); // Placeholder for next tab
+                        tab.setText("Departments");
                         break;
-
+                    case 2:
+                        tab.setText("Test"); // Placeholder for next tab
+                        break;
+                    case 3:
+                        tab.setText("Logout");
+                        break;
+                    default:
+                        tab.setText("Unknown");
+                        break;
                 }
             }
         }).attach();
