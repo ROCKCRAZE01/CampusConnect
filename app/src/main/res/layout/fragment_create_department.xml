@@ -30,6 +30,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+        <EditText android:id="@+id/etClubCode" android:hint="Club Code" android:layout_height="wrap_content" android:layout_width="match_parent"/>
         <EditText android:id="@+id/etClubName" android:hint="Club Name" android:layout_height="wrap_content" android:layout_width="match_parent"/>
         <EditText android:id="@+id/etFacultyAdvisor" android:hint="Faculty Advisor ID" android:layout_height="wrap_content" android:layout_width="match_parent"/>
     </LinearLayout>

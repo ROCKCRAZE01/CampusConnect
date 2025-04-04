@@ -36,11 +36,45 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
+            <!-- Spinner for Target Audience -->
+            <TextView
+                android:text="Target Audience:"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"/>
+
+            <Spinner
+                android:id="@+id/spinnerTargetAudience"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <!-- Target ID (Optional, show only if audience needs it) -->
+            <EditText
+                android:id="@+id/etTargetId"
+                android:hint="Enter Target ID (if required)"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <!-- Visible To Role -->
+            <TextView
+                android:text="Visible To Role:"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"/>
+
+            <Spinner
+                android:id="@+id/spinnerVisibleToRole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
             <Button
                 android:id="@+id/btnCreateAnnouncement"
                 android:text="Create Announcement"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"/>
+
             <Button
                 android:id="@+id/btnCancelAnnouncement"
                 android:text="Cancel"

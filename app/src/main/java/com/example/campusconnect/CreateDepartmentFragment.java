@@ -23,8 +23,10 @@ public class CreateDepartmentFragment extends Fragment {
 
     private Spinner spinnerEntity, spinnerOperation;
     private LinearLayout layoutDepartment, layoutClub;
-    private EditText etDeptCode, etDeptName, etDirector, etClubName, etFacultyAdvisor;
+    private EditText etDeptCode, etDeptName, etDirector, etClubName, etFacultyAdvisor, etClubCode;
     private Button btnCreate, btnModify, btnDelete;
+    private int selectedEntityPosition =0;
+    private int selectedOperationPosition =0;
 
     @Nullable
     @Override
@@ -41,6 +43,7 @@ public class CreateDepartmentFragment extends Fragment {
         etDeptName = view.findViewById(R.id.etDeptName);
         etDirector = view.findViewById(R.id.etDirector);
         etClubName = view.findViewById(R.id.etClubName);
+        etClubCode = view.findViewById(R.id.etClubCode);
         etFacultyAdvisor = view.findViewById(R.id.etFacultyAdvisor);
 
         btnCreate = view.findViewById(R.id.btnCreate);
@@ -59,21 +62,28 @@ public class CreateDepartmentFragment extends Fragment {
         spinnerOperation.setAdapter(operationAdapter);
 
         // Handle entity selection
+        selectedEntityPosition = 0;
+        selectedOperationPosition = 0;
+
         spinnerEntity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                updateEntityUI(position);
+                selectedEntityPosition = position;
+                updateEntityUI(position);          // Update UI on entity change
+                updateOperationUI(selectedOperationPosition); // Re-apply operation UI to match new entity
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        // Handle operation selection
         spinnerOperation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                updateOperationUI(position);
+                selectedOperationPosition = position;
+                updateOperationUI(position);       // Update UI on operation change
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
@@ -108,6 +118,7 @@ public class CreateDepartmentFragment extends Fragment {
             } else if (selectedEntity.equals("Club")) {
                 String clubName = etClubName.getText().toString().trim();
                 String facultyAdvisorStr = etFacultyAdvisor.getText().toString().trim();
+                String clubCode = etClubCode.getText().toString().trim();
 
                 if (clubName.isEmpty() || facultyAdvisorStr.isEmpty()) {
                     Toast.makeText(getContext(), "Fill all club fields!", Toast.LENGTH_SHORT).show();
@@ -122,7 +133,7 @@ public class CreateDepartmentFragment extends Fragment {
                     return;
                 }
 
-                boolean success = dbHelper.createClub(clubName, facultyAdvisorId);
+                boolean success = dbHelper.createClub(clubName,clubCode ,facultyAdvisorId);
                 Toast.makeText(getContext(), success ? "Club Created!" : "Advisor must be a Faculty!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -132,39 +143,65 @@ public class CreateDepartmentFragment extends Fragment {
     }
 
     private void updateEntityUI(int position) {
-        if (position == 1) {
+        if (position == 1) { // Department
             layoutDepartment.setVisibility(View.VISIBLE);
             layoutClub.setVisibility(View.GONE);
-        } else if (position == 2) {
+        } else if (position == 2) { // Club
             layoutDepartment.setVisibility(View.GONE);
             layoutClub.setVisibility(View.VISIBLE);
         }
     }
 
+
     private void updateOperationUI(int position) {
-        if(position ==1){
-            etDeptCode.setVisibility(View.VISIBLE);
-            etDeptName.setVisibility(View.VISIBLE);
-            etDirector.setVisibility(View.VISIBLE);
-            etClubName.setVisibility(View.VISIBLE);
-            etFacultyAdvisor.setVisibility(View.VISIBLE);
-        }else if(position ==2){
-            etDeptCode.setVisibility(View.VISIBLE);
-            etDeptName.setVisibility(View.GONE);
-            etDirector.setVisibility(View.VISIBLE);
-            etClubName.setVisibility(View.VISIBLE);
-            etFacultyAdvisor.setVisibility(View.VISIBLE);
-        }else if(position ==3){
-            etDeptCode.setVisibility(View.VISIBLE);
-            etDeptName.setVisibility(View.GONE);
-            etDirector.setVisibility(View.GONE);
-            etClubName.setVisibility(View.VISIBLE);
-            etFacultyAdvisor.setVisibility(View.GONE);
+        boolean isDepartment = (selectedEntityPosition == 1);
+        boolean isClub = (selectedEntityPosition == 2);
+
+        // Hide all fields by default
+        etDeptCode.setVisibility(View.GONE);
+        etDeptName.setVisibility(View.GONE);
+        etDirector.setVisibility(View.GONE);
+        etClubCode.setVisibility(View.GONE);
+        etClubName.setVisibility(View.GONE);
+        etFacultyAdvisor.setVisibility(View.GONE);
+
+        // Reset buttons
+        btnCreate.setVisibility(View.GONE);
+        btnModify.setVisibility(View.GONE);
+        btnDelete.setVisibility(View.GONE);
+
+        if (position == 1) { // Create
+            if (isDepartment) {
+                etDeptCode.setVisibility(View.VISIBLE);
+                etDeptName.setVisibility(View.VISIBLE);
+                etDirector.setVisibility(View.VISIBLE);
+            } else if (isClub) {
+                etClubCode.setVisibility(View.VISIBLE);
+                etClubName.setVisibility(View.VISIBLE);
+                etFacultyAdvisor.setVisibility(View.VISIBLE);
+            }
+            btnCreate.setVisibility(View.VISIBLE);
+
+        } else if (position == 2) { // Modify
+            if (isDepartment) {
+                etDeptCode.setVisibility(View.VISIBLE);
+                etDirector.setVisibility(View.VISIBLE);
+            } else if (isClub) {
+                etClubCode.setVisibility(View.VISIBLE);
+                etFacultyAdvisor.setVisibility(View.VISIBLE);
+            }
+            btnModify.setVisibility(View.VISIBLE);
+
+        } else if (position == 3) { // Delete
+            if (isDepartment) {
+                etDeptCode.setVisibility(View.VISIBLE);
+            } else if (isClub) {
+                etClubCode.setVisibility(View.VISIBLE);
+            }
+            btnDelete.setVisibility(View.VISIBLE);
         }
-        btnCreate.setVisibility(position == 1 ? View.VISIBLE : View.GONE);
-        btnModify.setVisibility(position == 2 ? View.VISIBLE : View.GONE);
-        btnDelete.setVisibility(position == 3 ? View.VISIBLE : View.GONE);
     }
+
 
 
 }

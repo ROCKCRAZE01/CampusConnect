@@ -21,6 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_USERS = "Users";
     private static final String TABLE_DEPARTMENTS = "Departments";
     private static final String TABLE_DEPARTMENT_DIRECTORS = "Department_Directors";
+    private static final String TABLE_CLUB_FACULTY_ADVISORS = "Club_Faculty_Advisors";
     private static final String TABLE_ROLES = "Roles";
     private static final String TABLE_ROLE_PERMISSIONS = "Role_Permissions";
     private static final String TABLE_USER_ROLES = "User_Roles";
@@ -72,6 +73,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY (user_id) REFERENCES " + TABLE_USERS + "(user_id), " +
                 "PRIMARY KEY (department_id, user_id));");
 
+
         // Create Roles Table
         db.execSQL("CREATE TABLE " + TABLE_ROLES + " (" +
                 "role_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -97,20 +99,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "PRIMARY KEY (user_id, role_id, department_id));");
 
         // Table - Announcements
-        db.execSQL("CREATE TABLE " + TABLE_ANNOUNCEMENTS + " (" +
-                "announcement_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+//        db.execSQL("CREATE TABLE " + TABLE_ANNOUNCEMENTS + " (" +
+//                "announcement_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+//                "title TEXT NOT NULL, " +
+//                "description TEXT NOT NULL, " +
+//                "created_by INTEGER, " +
+//                "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+//                "FOREIGN KEY (created_by) REFERENCES Users(user_id));");
+
+        db.execSQL("CREATE TABLE "+  TABLE_ANNOUNCEMENTS +" (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "title TEXT NOT NULL, " +
-                "description TEXT NOT NULL, " +
-                "created_by INTEGER, " +
-                "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-                "FOREIGN KEY (created_by) REFERENCES Users(user_id));");
+                "content TEXT NOT NULL, " +
+                "created_by_role TEXT NOT NULL, " +
+                "created_by_id INTEGER NOT NULL, " +
+                "target_audience TEXT NOT NULL, " +
+                "target_id INTEGER, " +
+                "visible_to_role TEXT, " +
+                "created_at DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+                "FOREIGN KEY (created_by_id) REFERENCES Users(user_id));");
+
 
         db.execSQL("CREATE TABLE " + TABLE_CLUBS + " (" +
                 "club_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "club_code TEXT UNIQUE NOT NULL, "+
-                "name TEXT UNIQUE NOT NULL, " +
-                "faculty_advisor INTEGER, " +
-                "FOREIGN KEY (faculty_advisor) REFERENCES Users(user_id));");
+                "name TEXT UNIQUE NOT NULL ); " );
+
+
+
+        db.execSQL("CREATE TABLE " + TABLE_CLUB_FACULTY_ADVISORS + " (" +
+                "club_id INTEGER, " +
+                "user_id INTEGER, " +
+                "FOREIGN KEY (club_id) REFERENCES " + TABLE_CLUBS + "(club_id), " +
+                "FOREIGN KEY (user_id) REFERENCES " + TABLE_USERS + "(user_id), " +
+                "PRIMARY KEY (club_id, user_id));");
+
 
     }
 
@@ -124,6 +147,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_DEPARTMENTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLUBS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLUB_FACULTY_ADVISORS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ANNOUNCEMENTS);
         onCreate(db);
     }
@@ -204,7 +228,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return null;
     }
-
+    public int getUserID(String email) {
+        int userId = -1; // Default value if not found
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT user_id FROM users WHERE email = ?", new String[]{email});
+        if (cursor != null && cursor.moveToFirst()) {
+            userId = cursor.getInt(0);
+            cursor.close();
+        }
+        db.close();
+        return userId;
+    }
     public int getApproveStatus(String email) {
         int approveStatus = 0; // Default value if not found
         SQLiteDatabase db = this.getReadableDatabase();
@@ -274,17 +308,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.close();
         }
     }
-    public boolean createClub(String clubName, int facultyAdvisorId) {
+    public boolean createClub(String clubName, String clubCode ,int facultyAdvisorId) {
         if (!isUserProfessor(facultyAdvisorId)) return false;
 
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("name", clubName);
-        values.put("faculty_advisor", facultyAdvisorId);
+        db.beginTransaction();
 
-        long result = db.insert(TABLE_CLUBS, null, values);
-        db.close();
-        return result != -1;
+        try{
+            ContentValues values = new ContentValues();
+            values.put("name", clubName);
+            values.put("club_code", clubCode);
+            long result = db.insert(TABLE_CLUBS, null, values);
+            if (result == -1) {
+                db.endTransaction();
+                return false;
+            }
+
+
+            ContentValues advisorValues = new ContentValues();
+            advisorValues.put("user_id", facultyAdvisorId);
+            advisorValues.put("club_id", result);
+            long advisorResult = db.insert(TABLE_CLUB_FACULTY_ADVISORS, null, advisorValues);
+            if (advisorResult == -1) {
+                db.endTransaction();
+                return false;
+            }
+
+            db.setTransactionSuccessful();
+            return true;
+
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+
+
+
     }
     public boolean deleteDepartment(String deptCode) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -327,32 +386,135 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return false;
     }
 
-    public boolean createAnnouncement(String title, String description, int createdBy) {
+//    public boolean createAnnouncement(String title, String description, int createdBy) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        ContentValues values = new ContentValues();
+//        values.put("title", title);
+//        values.put("description", description);
+//        values.put("created_by", createdBy);
+//
+//        long result = db.insert("Announcements", null, values);
+//        return result != -1;
+//    }
+    public boolean createAnnouncement(String title, String description, int createdBy,
+                                      String targetAudience, String visibleToRole, Integer targetId) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("title", title);
-        values.put("description", description);
-        values.put("created_by", createdBy);
+        values.put("content", description);
+
+        String role=getBaseRoleByUserId(createdBy);
+        values.put("created_by_role", role);
+        values.put("created_by_id", createdBy);
+        values.put("target_audience", targetAudience);
+        values.put("visible_to_role", visibleToRole);
+
+        values.put("target_id", targetId);
+
 
         long result = db.insert("Announcements", null, values);
         return result != -1;
     }
+//    db.execSQL("CREATE TABLE "+  TABLE_ANNOUNCEMENTS +" (" +
+//            "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+//            "title TEXT NOT NULL, " +
+//            "content TEXT NOT NULL, " +
+//            "created_by_role TEXT NOT NULL, " +
+//            "created_by_id INTEGER NOT NULL, " +
+//            "target_audience TEXT NOT NULL, " +
+//            "target_id INTEGER, " +
+//            "visible_to_role TEXT, " +
+//            "created_at DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+//            "FOREIGN KEY (created_by_id) REFERENCES Users(user_id));");
 
-    public List<String> getAllAnnouncements() {
+
+    public String getBaseRoleByUserId(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String baseRole = null;
+
+        Cursor cursor = db.rawQuery("SELECT " + COLUMN_BASE_ROLE + " FROM " + TABLE_USERS + " WHERE " + COLUMN_USER_ID + " = ?", new String[]{String.valueOf(userId)});
+        if (cursor != null && cursor.moveToFirst()) {
+            baseRole = cursor.getString(0);
+            cursor.close();
+        }
+
+        return baseRole;
+    }
+
+    public List<String> getAllAnnouncements(int userId, String userRole, int departmentId, int subDepartmentId, List<Integer> clubIds) {
         List<String> announcements = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT title, description, timestamp FROM Announcements ORDER BY timestamp DESC", null);
+
+        // Base query
+        String query = "SELECT title, content, created_at FROM Announcements WHERE visible_to_role = ? AND (";
+
+        List<String> selectionArgsList = new ArrayList<>();
+        selectionArgsList.add(userRole); // For visible_to_role match
+
+        // Add filters for target_audience
+        query += "target_audience = 'all' OR ";
+        query += "target_audience = 'all_" + userRole + "s' OR ";
+
+        // Department-specific filter
+        query += "(target_audience = 'department' AND target_id = ?) OR ";
+        selectionArgsList.add(String.valueOf(departmentId));
+
+        // Subdepartment-specific filter
+        query += "(target_audience = 'subdepartment' AND target_id = ?) OR ";
+        selectionArgsList.add(String.valueOf(subDepartmentId));
+
+        // Club-specific filter
+        if (clubIds != null && !clubIds.isEmpty()) {
+            StringBuilder clubConditions = new StringBuilder();
+            for (int i = 0; i < clubIds.size(); i++) {
+                if (i > 0) clubConditions.append(" OR ");
+                clubConditions.append("(target_audience = 'club' AND target_id = ?)");
+                selectionArgsList.add(String.valueOf(clubIds.get(i)));
+            }
+            query += clubConditions.toString();
+        } else {
+            // To avoid dangling OR at the end if no clubs
+            query = query.substring(0, query.length() - 4); // Remove last " OR "
+        }
+
+        query += ") ORDER BY created_at DESC";
+
+        Cursor cursor = db.rawQuery(query, selectionArgsList.toArray(new String[0]));
+
         if (cursor.moveToFirst()) {
             do {
                 String title = cursor.getString(0);
-                String desc = cursor.getString(1);
-                String time = cursor.getString(2);
-                announcements.add("📢 " + title + "\n" + desc + "\n🕒 " + time);
+                String content = cursor.getString(1);
+                String timestamp = cursor.getString(2);
+                announcements.add("📢 " + title + "\n" + content + "\n🕒 " + timestamp);
             } while (cursor.moveToNext());
         }
         cursor.close();
         return announcements;
     }
+
+
+    public List<String> getAllAnnouncementsForSuperadmin() {
+        List<String> announcements = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Superadmin sees all announcements
+        String query = "SELECT title, content, created_at FROM Announcements ORDER BY created_at DESC";
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                String title = cursor.getString(0);
+                String content = cursor.getString(1);
+                String timestamp = cursor.getString(2);
+                announcements.add("📢 " + title + "\n" + content + "\n🕒 " + timestamp);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return announcements;
+    }
+
+
 
 
 

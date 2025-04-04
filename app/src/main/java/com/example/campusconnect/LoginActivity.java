@@ -3,7 +3,11 @@ package com.example.campusconnect;
 
 
 
+import static androidx.core.app.PendingIntentCompat.getActivity;
+
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -43,8 +47,14 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        int userID = databaseHelper.getUserID(email);
         String baseRole = databaseHelper.getUserRole(email, password);
+        SharedPreferences sharedPreferences = getSharedPreferences("CampusConnectPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt("userID", userID);
+        editor.apply();
+
+
         int approveStatus = databaseHelper.getApproveStatus(email);
         approveStatus=1;
         if (baseRole != null && approveStatus == 1) {
@@ -62,8 +72,8 @@ public class LoginActivity extends AppCompatActivity {
             case "Superadmin":
                 intent = new Intent(this, SuperAdminActivity.class);
                 break;
-            case "Director":
-                intent = new Intent(this, DirectorDashboard.class);
+            case "Professor":
+                intent = new Intent(this, ProfessorActivity.class);
                 break;
             case "Club President":
                 intent = new Intent(this, ClubManagement.class);

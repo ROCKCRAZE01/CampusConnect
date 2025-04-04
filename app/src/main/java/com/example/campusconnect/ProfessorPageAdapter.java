@@ -1,15 +1,13 @@
 package com.example.campusconnect;
 
-
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-public class SuperAdminPagerAdapter extends FragmentStateAdapter {
-
-    public SuperAdminPagerAdapter(@NonNull SuperAdminActivity activity) {
-        super(activity);
+public class ProfessorPageAdapter extends FragmentStateAdapter {
+    public ProfessorPageAdapter(@NonNull FragmentActivity fragmentActivity) {
+        super(fragmentActivity);
     }
 
     @NonNull
@@ -17,12 +15,8 @@ public class SuperAdminPagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return new CreateDepartmentFragment();
+                return new ProfessorAnnouncementFragment();
             case 1:
-                return new ApproveUserFragment(); // Placeholder for additional tab
-            case 2:
-                return new SuperAdminAnnouncementsFragment(); // Placeholder for additional tab
-            case 3:
                 return new LogoutFragment();
             default:
                 return new CreateDepartmentFragment();
@@ -31,6 +25,6 @@ public class SuperAdminPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 4; // Update this number when adding more tabs
+        return 2;
     }
 }
