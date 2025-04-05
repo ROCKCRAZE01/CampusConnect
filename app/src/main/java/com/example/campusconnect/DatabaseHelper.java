@@ -168,6 +168,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
+    public boolean isUserDirector(int userId, int departmentId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT 1 FROM DepartmentDirectors WHERE user_id = ? AND department_id = ?",
+                new String[]{String.valueOf(userId), String.valueOf(departmentId)}
+        );
+
+        boolean isDirector = cursor.moveToFirst();
+        cursor.close();
+        return isDirector;
+    }
 
     // **Method to Register a New User**
     public boolean registerUser(String name, String email, String password, String baseRole) {

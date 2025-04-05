@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:id="@+id/layoutCreateSubDept"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView android:text="Create Sub-Department" android:textSize="16sp" android:layout_height="wrap_content" android:layout_width="wrap_content" />
+        <EditText android:id="@+id/etSubDeptName" android:hint="Name" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <EditText android:id="@+id/etSubDeptCode" android:hint="Code" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <EditText android:id="@+id/etHodId" android:hint="HOD ID" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <EditText android:id="@+id/etMemberIds" android:hint="Comma-separated Member IDs" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <Button android:id="@+id/btnCreateSubDept" android:text="Create" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    </LinearLayout>
+</ScrollView>
