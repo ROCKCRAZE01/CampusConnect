@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,22 +26,27 @@ import java.util.Map;
 import java.util.Set;
 
 public class ProfessorDepartmentFragment extends Fragment {
-    Spinner spinnerDepartment;
+    Spinner spinnerDepartment,spinnerclubProfessor;
     DatabaseHelper databaseHelper ;
     private int currentProfessorId;
     private Map<String, Integer> departmentNameIdMap = new LinkedHashMap<>();
     private List<String> departmentNames = new ArrayList<>();
+
+    private Map<String, Integer> clubNameIdMap = new LinkedHashMap<>();
+    private List<String> clubNames = new ArrayList<>();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_professor_department,container,false);
         spinnerDepartment = view.findViewById(R.id.spinnerDepartment);
+        spinnerclubProfessor =view.findViewById(R.id.spinnerclubProfessor);
         databaseHelper =new DatabaseHelper(getContext());
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("CampusConnectPrefs", Context.MODE_PRIVATE);
         currentProfessorId = sharedPreferences.getInt("userID", -1);
         loadDepartmentsForProfessor(currentProfessorId);
+        loadClubsForProfessor(currentProfessorId);
 
         spinnerDepartment.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -60,6 +66,26 @@ public class ProfessorDepartmentFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
                 // Do nothing
+            }
+        });
+
+        spinnerclubProfessor.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String selectedClub = adapterView.getItemAtPosition(i).toString();
+                if (selectedClub.equals("Select Club")) {
+                    return; // Skip default item
+                }
+                int clubId = clubNameIdMap.get(selectedClub);
+                Intent intent = new Intent(getContext(), ProfessorClubDetailActivity.class);
+                intent.putExtra("club_id", clubId);
+                intent.putExtra("user_id", currentProfessorId);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
             }
         });
 
@@ -116,4 +142,38 @@ public class ProfessorDepartmentFragment extends Fragment {
         );
         spinnerDepartment.setAdapter(adapter);
     }
+
+    private void loadClubsForProfessor(int userId) {
+        SQLiteDatabase db = databaseHelper.getReadableDatabase();
+        clubNameIdMap.clear();
+        clubNames.clear();
+
+        clubNames.add("Select Club");
+
+        String query = "SELECT c.club_id, c.name " +
+                "FROM CLUBS c " +
+                "INNER JOIN CLUB_FACULTY_ADVISORS fa ON c.club_id = fa.club_id " +
+                "WHERE fa.user_id = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
+        if (cursor.moveToFirst()) {
+            do {
+                int clubId = cursor.getInt(0);
+                String clubName = cursor.getString(1);
+                if (!clubNameIdMap.containsKey(clubName)) {
+                    clubNameIdMap.put(clubName, clubId);
+                    clubNames.add(clubName);
+                }
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                clubNames
+        );
+        spinnerclubProfessor.setAdapter(adapter);
+    }
+
 }

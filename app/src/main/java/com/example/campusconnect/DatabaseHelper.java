@@ -28,7 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_CLUBS = "Clubs";
     private static final String TABLE_ANNOUNCEMENTS = "Announcements";
     private static final String TABLE_DEPARTMENT_MEMBERS = "DepartmentMembers";
-
+    private static final String TABLE_CLUB_MEMBERS = "ClubMembers";
     // Column Names - Users
     private static final String COLUMN_USER_ID = "user_id";
     private static final String COLUMN_NAME = "name";
@@ -136,6 +136,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "club_code TEXT UNIQUE NOT NULL, "+
                 "name TEXT UNIQUE NOT NULL ); " );
 
+        db.execSQL("CREATE TABLE " + TABLE_CLUB_MEMBERS + " (" +
+                "club_id INTEGER, " +
+                "user_id INTEGER, " +
+                "role TEXT NOT NULL, " +
+                "PRIMARY KEY (club_id, user_id), " +
+                "FOREIGN KEY (club_id) REFERENCES Clubs(club_id), " +
+                "FOREIGN KEY (user_id) REFERENCES Users(user_id));");
 
 
         db.execSQL("CREATE TABLE " + TABLE_CLUB_FACULTY_ADVISORS + " (" +
@@ -161,6 +168,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLUB_FACULTY_ADVISORS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_ANNOUNCEMENTS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_DEPARTMENT_MEMBERS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CLUB_MEMBERS);
 
         onCreate(db);
     }

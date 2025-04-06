@@ -10,5 +10,5 @@
         android:layout_height="wrap_content"
         android:text="Hello Prof Dep"/>
     <Spinner android:id="@+id/spinnerDepartment" android:layout_width="match_parent" android:layout_height="wrap_content"/>
-
+    <Spinner android:id="@+id/spinnerclubProfessor" android:layout_width="match_parent" android:layout_height="wrap_content"/>
 </LinearLayout>
