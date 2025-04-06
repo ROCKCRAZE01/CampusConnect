@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,6 +145,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY (club_id) REFERENCES " + TABLE_CLUBS + "(club_id), " +
                 "FOREIGN KEY (user_id) REFERENCES " + TABLE_USERS + "(user_id), " +
                 "PRIMARY KEY (club_id, user_id));");
+
+        db.execSQL("CREATE TABLE StudentClubs (" +
+                "student_id INTEGER, " +
+                "club_id INTEGER, " +
+                "role TEXT NOT NULL, " +
+                "FOREIGN KEY (student_id) REFERENCES Users(user_id), " +
+                "FOREIGN KEY (club_id) REFERENCES Clubs(club_id), " +
+                "PRIMARY KEY (student_id, club_id));");
 
 
     }
@@ -544,6 +553,98 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return announcements;
     }
+    public List<String> getAllAnnouncementsForStudent(int studentId) {
+        List<String> announcements = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Step 1: Get student's club IDs
+        List<Integer> studentClubIds = new ArrayList<>();
+        Cursor clubCursor = db.rawQuery(
+                "SELECT club_id FROM StudentClubs WHERE student_id = ?", new String[]{String.valueOf(studentId)}
+        );
+        if (clubCursor.moveToFirst()) {
+            do {
+                studentClubIds.add(clubCursor.getInt(0));
+            } while (clubCursor.moveToNext());
+        }
+        clubCursor.close();
+
+        // Step 2: Prepare query for all + students + student's clubs
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("SELECT title, content, created_at FROM Announcements ")
+                .append("WHERE target_audience IN ('all', 'students', 'all_students') ");
+
+        if (!studentClubIds.isEmpty()) {
+            queryBuilder.append("OR (target_audience = 'club' AND target_id IN (")
+                    .append(makePlaceholders(studentClubIds.size()))
+                    .append(")) ");
+        }
+
+        queryBuilder.append("ORDER BY created_at DESC");
+
+        // Step 3: Arguments for club IDs
+        String[] args = new String[studentClubIds.size()];
+        for (int i = 0; i < studentClubIds.size(); i++) {
+            args[i] = String.valueOf(studentClubIds.get(i));
+        }
+
+        Cursor cursor = db.rawQuery(queryBuilder.toString(), args);
+
+        if (cursor.moveToFirst()) {
+            do {
+                String title = cursor.getString(0);
+                String content = cursor.getString(1);
+                String timestamp = cursor.getString(2);
+                announcements.add("📢 " + title + "\n" + content + "\n🕒 " + timestamp);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return announcements;
+    }
+
+    // Helper for (?, ?, ?, ...) placeholders
+    private String makePlaceholders(int count) {
+        if (count <= 0) return "";
+        StringBuilder sb = new StringBuilder("?");
+        for (int i = 1; i < count; i++) {
+            sb.append(",?");
+        }
+        return sb.toString();
+    }
+    public void logAllAnnouncements() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_ANNOUNCEMENTS, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow("id"));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow("title"));
+                String content = cursor.getString(cursor.getColumnIndexOrThrow("content"));
+                String createdByRole = cursor.getString(cursor.getColumnIndexOrThrow("created_by_role"));
+                int createdById = cursor.getInt(cursor.getColumnIndexOrThrow("created_by_id"));
+                String targetAudience = cursor.getString(cursor.getColumnIndexOrThrow("target_audience"));
+                int targetId = cursor.getInt(cursor.getColumnIndexOrThrow("target_id"));
+                String visibleToRole = cursor.getString(cursor.getColumnIndexOrThrow("visible_to_role"));
+                String createdAt = cursor.getString(cursor.getColumnIndexOrThrow("created_at"));
+
+                Log.d("ANNOUNCEMENT_ROW", "ID: " + id +
+                        ", Title: " + title +
+                        ", Content: " + content +
+                        ", CreatedByRole: " + createdByRole +
+                        ", CreatedById: " + createdById +
+                        ", Audience: " + targetAudience +
+                        ", TargetID: " + targetId +
+                        ", VisibleToRole: " + visibleToRole +
+                        ", CreatedAt: " + createdAt);
+            } while (cursor.moveToNext());
+        } else {
+            Log.d("ANNOUNCEMENT_ROW", "No announcements found.");
+        }
+
+        cursor.close();
+    }
+
 
 
 
