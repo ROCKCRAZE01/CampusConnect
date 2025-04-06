@@ -153,13 +153,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY (user_id) REFERENCES " + TABLE_USERS + "(user_id), " +
                 "PRIMARY KEY (club_id, user_id));");
 
-        db.execSQL("CREATE TABLE StudentClubs (" +
-                "student_id INTEGER, " +
-                "club_id INTEGER, " +
-                "role TEXT NOT NULL, " +
-                "FOREIGN KEY (student_id) REFERENCES Users(user_id), " +
-                "FOREIGN KEY (club_id) REFERENCES Clubs(club_id), " +
-                "PRIMARY KEY (student_id, club_id));");
 
 
     }
@@ -564,11 +557,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<String> getAllAnnouncementsForStudent(int studentId) {
         List<String> announcements = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-
-        // Step 1: Get student's club IDs
+// Step 1: Get student's club IDs
         List<Integer> studentClubIds = new ArrayList<>();
         Cursor clubCursor = db.rawQuery(
-                "SELECT club_id FROM StudentClubs WHERE student_id = ?", new String[]{String.valueOf(studentId)}
+                "SELECT club_id FROM " + TABLE_CLUB_MEMBERS + " WHERE user_id = ?", new String[]{String.valueOf(studentId)}
         );
         if (clubCursor.moveToFirst()) {
             do {
@@ -576,6 +568,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             } while (clubCursor.moveToNext());
         }
         clubCursor.close();
+
 
         // Step 2: Prepare query for all + students + student's clubs
         StringBuilder queryBuilder = new StringBuilder();
