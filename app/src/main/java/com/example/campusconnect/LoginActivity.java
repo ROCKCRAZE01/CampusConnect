@@ -75,7 +75,7 @@ public class LoginActivity extends AppCompatActivity {
             case "Professor":
                 intent = new Intent(this, ProfessorActivity.class);
                 break;
-            case "Club President":
+            case "Student":
                 intent = new Intent(this, ClubManagement.class);
                 break;
             default:
