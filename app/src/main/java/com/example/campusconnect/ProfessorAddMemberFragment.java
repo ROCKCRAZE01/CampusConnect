@@ -67,7 +67,7 @@ public class ProfessorAddMemberFragment extends Fragment {
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
         // Check if user has 'Student' base role
-        Cursor cursor = db.rawQuery("SELECT role FROM Users WHERE user_id = ?", new String[]{String.valueOf(memberUserId)});
+        Cursor cursor = db.rawQuery("SELECT baseRole FROM Users WHERE user_id = ?", new String[]{String.valueOf(memberUserId)});
         if (cursor.moveToFirst()) {
             String role = cursor.getString(0);
             if (!"Student".equalsIgnoreCase(role)) {
