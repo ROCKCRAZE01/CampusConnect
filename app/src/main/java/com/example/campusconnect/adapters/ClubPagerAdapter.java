@@ -24,7 +24,7 @@ public class ClubPagerAdapter extends FragmentStateAdapter {
         switch (position) {
             case 0: return ClubInfoFragment.newInstance(clubName);
             case 1: return ClubAnnouncementsFragment.newInstance(clubName);
-            case 2: return ClubInfoFragment.newInstance(clubName);
+            case 2: return ClubChatFragment.newInstance(clubName);
             default: return new ClubInfoFragment();
         }
     }
