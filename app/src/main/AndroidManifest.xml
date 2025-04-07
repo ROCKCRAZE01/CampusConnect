@@ -31,6 +31,7 @@
         <activity android:name=".RegisterActivity"/>
         <activity android:name=".DepartmentDetailActivity"/>
         <activity android:name=".ProfessorClubDetailActivity"/>
+        <activity android:name=".ClubDetailActivity" />
 
 
     </application>

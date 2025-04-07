@@ -18,7 +18,7 @@ public class StudentPageAdapter extends FragmentStateAdapter {
             case 0:
                 return new AnnouncementsFragment_student();
             case 1:
-                return new AnnouncementsFragment_student();
+                return new Clubs_for_students();
             case 2:
                 return new AnnouncementsFragment_student();
             case 3:
