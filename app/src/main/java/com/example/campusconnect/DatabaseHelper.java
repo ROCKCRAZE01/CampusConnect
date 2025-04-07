@@ -30,6 +30,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_ANNOUNCEMENTS = "Announcements";
     private static final String TABLE_DEPARTMENT_MEMBERS = "DepartmentMembers";
     private static final String TABLE_CLUB_MEMBERS = "ClubMembers";
+    private static final String TABLE_CLUB_ANNOUNCEMENTS = "ClubAnnouncements";
+
     // Column Names - Users
     private static final String COLUMN_USER_ID = "user_id";
     private static final String COLUMN_NAME = "name";
@@ -43,6 +45,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_ROLE_ID = "role_id";
     private static final String COLUMN_ROLE_NAME = "name";
     private static final String COLUMN_DEPARTMENT_ID = "department_id";
+
+    // Table - Club Announcements
+    private static final String COLUMN_CLUB_ANNOUNCEMENT_ID = "id";
+    private static final String COLUMN_CLUB_ANNOUNCEMENT_CLUB_NAME = "club_name";
+    private static final String COLUMN_CLUB_ANNOUNCEMENT_MESSAGE = "message";
+    private static final String COLUMN_CLUB_ANNOUNCEMENT_TIMESTAMP = "timestamp";
+
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -152,6 +161,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY (club_id) REFERENCES " + TABLE_CLUBS + "(club_id), " +
                 "FOREIGN KEY (user_id) REFERENCES " + TABLE_USERS + "(user_id), " +
                 "PRIMARY KEY (club_id, user_id));");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS ClubAnnouncements (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "club_name TEXT NOT NULL, " +
+                "message TEXT NOT NULL, " +
+                "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)");
+
 
 
 
@@ -645,6 +661,148 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         cursor.close();
     }
+    public List<String> getClubsForStudent(int userId) {
+        List<String> clubs = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT c.name FROM " + TABLE_CLUBS + " c " +
+                        "INNER JOIN " + TABLE_CLUB_MEMBERS + " cm ON c.club_id = cm.club_id " +
+                        "WHERE cm.user_id = ?",
+                new String[]{String.valueOf(userId)}
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                clubs.add(cursor.getString(0));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return clubs;
+    }
+    public String getClubInfo(String clubName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String info = "";
+
+        Cursor cursor = db.rawQuery("SELECT club_code FROM Clubs WHERE name = ?", new String[]{clubName});
+
+        if (cursor.moveToFirst()) {
+            String code = cursor.getString(cursor.getColumnIndexOrThrow("club_code"));
+            info = "Club Name: " + clubName + "\nClub Code: " + code;
+        } else {
+            info = "No info found for club: " + clubName;
+        }
+
+        cursor.close();
+        return info;
+    }
+    public List<String> getClubFacultyAdvisors(String clubName) {
+        List<String> advisors = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT u.name FROM Users u " +
+                        "JOIN Club_Faculty_Advisors cfa ON u.user_id = cfa.user_id " +
+                        "JOIN Clubs c ON c.club_id = cfa.club_id " +
+                        "WHERE c.name = ?", new String[]{clubName});
+
+        while (cursor.moveToNext()) {
+            advisors.add(cursor.getString(0));
+        }
+
+        cursor.close();
+        return advisors;
+    }
+    public List<String> getClubMembersWithRoles(String clubName) {
+        List<String> members = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT u.name, cm.role FROM Users u " +
+                        "JOIN ClubMembers cm ON u.user_id = cm.user_id " +
+                        "JOIN Clubs c ON c.club_id = cm.club_id " +
+                        "WHERE c.name = ?", new String[]{clubName});
+
+        while (cursor.moveToNext()) {
+            String name = cursor.getString(0);
+            String role = cursor.getString(1);
+            members.add(name + " (" + role + ")");
+        }
+
+        cursor.close();
+        return members;
+    }
+
+    public int getClubIdByName(String clubName) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int clubId = -1;
+
+        Cursor cursor = db.rawQuery(
+                "SELECT club_id FROM " + TABLE_CLUBS + " WHERE name = ?",
+                new String[]{clubName}
+        );
+
+        if (cursor.moveToFirst()) {
+            clubId = cursor.getInt(0);
+        }
+
+        cursor.close();
+        return clubId;
+    }
+
+    public boolean addClubAnnouncement(String clubName, String message) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_CLUB_ANNOUNCEMENT_CLUB_NAME, clubName);
+        values.put(COLUMN_CLUB_ANNOUNCEMENT_MESSAGE, message);
+
+        long result = db.insert(TABLE_CLUB_ANNOUNCEMENTS, null, values);
+        return result != -1; // returns true if insertion was successful
+    }
+
+
+    // Returns the role of the student in the given club
+    public String getStudentRoleInClub(int userId, int clubId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String role = "";
+
+        Cursor cursor = db.rawQuery(
+                "SELECT role FROM " + TABLE_CLUB_MEMBERS + " WHERE user_id = ? AND club_id = ?",
+                new String[]{String.valueOf(userId), String.valueOf(clubId)}
+        );
+
+        if (cursor.moveToFirst()) {
+            role = cursor.getString(0);
+        }
+
+        cursor.close();
+        return role;
+    }
+
+    // Returns list of announcements for a club
+    public List<String> getAnnouncementsForClub(String clubName) {
+        List<String> announcements = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT message FROM ClubAnnouncements WHERE club_name = ? ORDER BY timestamp DESC",
+                new String[]{clubName}
+        );
+
+        while (cursor.moveToNext()) {
+            announcements.add(cursor.getString(0));
+        }
+
+        cursor.close();
+        return announcements;
+    }
+
+
+
+
+
+
 
 
 
