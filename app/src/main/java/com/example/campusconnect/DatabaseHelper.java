@@ -10,6 +10,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.example.campusconnect.models.ChatMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +53,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_CLUB_ANNOUNCEMENT_CLUB_NAME = "club_name";
     private static final String COLUMN_CLUB_ANNOUNCEMENT_MESSAGE = "message";
     private static final String COLUMN_CLUB_ANNOUNCEMENT_TIMESTAMP = "timestamp";
+
+    // Table - Club Chat Messages
+    private static final String TABLE_CLUB_CHAT_MESSAGES = "ClubChatMessages";
+
+    private static final String COLUMN_CLUB_CHAT_ID = "id";
+    private static final String COLUMN_CLUB_CHAT_CLUB_ID = "club_id";
+    private static final String COLUMN_CLUB_CHAT_SENDER_ID = "sender_id";
+    private static final String COLUMN_CLUB_CHAT_MESSAGE = "message";
+    private static final String COLUMN_CLUB_CHAT_TIMESTAMP = "timestamp";
 
 
     public DatabaseHelper(Context context) {
@@ -168,7 +179,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "message TEXT NOT NULL, " +
                 "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)");
 
+        String CREATE_CLUB_CHAT_MESSAGES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_CLUB_CHAT_MESSAGES + " (" +
+                COLUMN_CLUB_CHAT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_CLUB_CHAT_CLUB_ID + " INTEGER NOT NULL, " +
+                COLUMN_CLUB_CHAT_SENDER_ID + " INTEGER NOT NULL, " +
+                COLUMN_CLUB_CHAT_MESSAGE + " TEXT NOT NULL, " +
+                COLUMN_CLUB_CHAT_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+                "FOREIGN KEY (" + COLUMN_CLUB_CHAT_CLUB_ID + ") REFERENCES Clubs(club_id), " +
+                "FOREIGN KEY (" + COLUMN_CLUB_CHAT_SENDER_ID + ") REFERENCES Users(user_id)" +
+                ");";
 
+        db.execSQL(CREATE_CLUB_CHAT_MESSAGES_TABLE);
 
 
     }
@@ -797,13 +818,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return announcements;
     }
+    public void insertClubChatMessage(String clubName, int senderId, String message) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        int clubId = getClubIdByName(clubName);
+        if (clubId != -1) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_CLUB_CHAT_CLUB_ID, clubId);
+            values.put(COLUMN_CLUB_CHAT_SENDER_ID, senderId);
+            values.put(COLUMN_CLUB_CHAT_MESSAGE, message);
 
+            db.insert(TABLE_CLUB_CHAT_MESSAGES, null, values);
+        }
+    }
+    public List<ChatMessage> getClubChatMessages(String clubName) {
+        List<ChatMessage> messages = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
 
+        String query = "SELECT Users.name, ClubChatMessages.message " +
+                "FROM ClubChatMessages " +
+                "JOIN Users ON ClubChatMessages.sender_id = Users.user_id " +
+                "JOIN Clubs ON ClubChatMessages.club_id = Clubs.club_id " +
+                "WHERE Clubs.name = ? " +
+                "ORDER BY ClubChatMessages.timestamp ASC";
 
+        Cursor cursor = db.rawQuery(query, new String[]{clubName});
 
+        if (cursor.moveToFirst()) {
+            do {
+                String senderName = cursor.getString(0);
+                String message = cursor.getString(1);
+                messages.add(new ChatMessage(senderName, message));
+            } while (cursor.moveToNext());
+        }
 
-
+        cursor.close();
+        db.close();
+        return messages;
+    }
 
 
 
