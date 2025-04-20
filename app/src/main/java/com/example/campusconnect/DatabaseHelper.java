@@ -856,6 +856,52 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return messages;
     }
+    public List<String> getClubsForWhichUserIsFacultyAdvisor(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<String> clubNames = new ArrayList<>();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT name FROM " + TABLE_CLUBS + " WHERE club_id IN " +
+                        "(SELECT club_id FROM " + TABLE_CLUB_FACULTY_ADVISORS + " WHERE user_id = ?)",
+                new String[]{String.valueOf(userId)}
+        );
+
+        while (cursor.moveToNext()) {
+            clubNames.add(cursor.getString(0));
+        }
+
+        cursor.close();
+        return clubNames;
+    }
+    public void insertProfessorAnnouncement(String title, String content, int professorId, String createdByRole, String targetAudience, int clubId,String Clubname) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+
+
+        // Insert into the appropriate table based on the target audience
+        if ("club".equals(targetAudience)) {
+            // Insert into ClubAnnouncements table
+            values.put("club_name", Clubname);  // Assuming title is the club name in case of club-specific announcements
+            values.put("message", content);  // Assuming content is the message of the announcement
+            db.insert("ClubAnnouncements", null, values);
+        } else {
+            values.put("title", title);  // Title of the announcement
+            values.put("content", content);  // Content of the announcement
+            values.put("created_by_role", createdByRole);  // Role of the creator (Professor)
+            values.put("created_by_id", professorId);  // Professor's ID
+            values.put("target_audience", targetAudience);  // Target audience (either "all" or "club")
+            values.put("target_id", clubId);  // If it's a club announcement, store club ID, otherwise NULL
+            values.put("created_at", System.currentTimeMillis());  // Timestamp for the creation time
+            // Insert into Announcements table (for all audience)
+            db.insert("Announcements", null, values);
+        }
+
+        db.close();
+    }
+
+
+
 
 
 
