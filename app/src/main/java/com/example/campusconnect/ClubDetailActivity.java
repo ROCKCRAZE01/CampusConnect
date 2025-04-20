@@ -35,6 +35,7 @@ public class ClubDetailActivity extends AppCompatActivity {
                 case 0: tab.setText("Info"); break;
                 case 1: tab.setText("Announcements"); break;
                 case 2: tab.setText("Chat"); break;
+                case 3: tab.setText("Document Approval");break;
             }
         }).attach();
     }

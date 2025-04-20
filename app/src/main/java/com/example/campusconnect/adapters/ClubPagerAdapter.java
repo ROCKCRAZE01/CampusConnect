@@ -8,6 +8,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import com.example.campusconnect.fragments.ClubInfoFragment;
 import com.example.campusconnect.fragments.ClubAnnouncementsFragment;
 import com.example.campusconnect.fragments.ClubChatFragment;
+import com.example.campusconnect.fragments.UploadDocumentFragment;
 
 public class ClubPagerAdapter extends FragmentStateAdapter {
 
@@ -25,12 +26,13 @@ public class ClubPagerAdapter extends FragmentStateAdapter {
             case 0: return ClubInfoFragment.newInstance(clubName);
             case 1: return ClubAnnouncementsFragment.newInstance(clubName);
             case 2: return ClubChatFragment.newInstance(clubName);
+            case 3: return UploadDocumentFragment.newInstance(clubName);
             default: return new ClubInfoFragment();
         }
     }
 
     @Override
     public int getItemCount() {
-        return 3;
+        return 4;
     }
 }

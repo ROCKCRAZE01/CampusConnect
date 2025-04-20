@@ -5,9 +5,11 @@ package com.example.campusconnect;
 
 import static androidx.core.app.PendingIntentCompat.getActivity;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -22,11 +24,15 @@ public class LoginActivity extends AppCompatActivity {
     private Button loginButton;
     private TextView registerText;
     private DatabaseHelper databaseHelper;
+    private SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        databaseHelper=new DatabaseHelper(this);
+        db=databaseHelper.getWritableDatabase();
+//        insertStaticDocumentData();
 
         emailInput = findViewById(R.id.emailInput);
         passwordInput = findViewById(R.id.passwordInput);
@@ -64,6 +70,39 @@ public class LoginActivity extends AppCompatActivity {
         } else  {
             Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
         }
+    }
+    private void insertStaticDocumentData() {
+        try {
+            // Insert Document Types (if not already inserted)
+            insertDocumentType(1, "PERM Time Extension");
+            insertDocumentType(2, "Event Budget");
+            insertDocumentType(3, "Resource Request");
+
+            // Insert Approval Flow for "PERM Time Extension"
+            insertApprovalFlow(1, 5, 1);
+            insertApprovalFlow(1, 6, 2);
+            insertApprovalFlow(1, 2, 3);
+
+
+            Toast.makeText(this, "Document types and approval flow inserted", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Error inserting data: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void insertDocumentType(int id, String name) {
+        ContentValues values = new ContentValues();
+        values.put("id", id);
+        values.put("name", name);
+        db.insertWithOnConflict("DocumentTypes", null, values, SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    private void insertApprovalFlow(int documentTypeId, int approverUserId, int level) {
+        ContentValues values = new ContentValues();
+        values.put("document_type_id", documentTypeId);
+        values.put("approver_user_id", approverUserId);
+        values.put("step_number", level); // or "level" depending on your schema
+        db.insertWithOnConflict("DocumentApprovalFlow", null, values, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
     private void navigateBasedOnRole(String role) {

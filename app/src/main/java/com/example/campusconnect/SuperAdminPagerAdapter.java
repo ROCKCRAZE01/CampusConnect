@@ -23,6 +23,8 @@ public class SuperAdminPagerAdapter extends FragmentStateAdapter {
             case 2:
                 return new SuperAdminAnnouncementsFragment(); // Placeholder for additional tab
             case 3:
+                return new DocumentApprovalFragment().newInstance();
+            case 4:
                 return new LogoutFragment();
             default:
                 return new CreateDepartmentFragment();

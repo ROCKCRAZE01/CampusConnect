@@ -35,8 +35,9 @@ public class ProfessorActivity extends AppCompatActivity {
                         tab.setText("Departments");
                         break;
                     case 2:
-                        tab.setText("Test"); // Placeholder for next tab
+                        tab.setText("Document Approvals");
                         break;
+
                     case 3:
                         tab.setText("Logout");
                         break;
