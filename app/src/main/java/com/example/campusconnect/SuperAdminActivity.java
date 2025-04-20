@@ -38,6 +38,9 @@ public class SuperAdminActivity extends AppCompatActivity {
                         tab.setText("Announcements"); // Placeholder for next tab
                         break;
                     case 3:
+                        tab.setText("Document Approval");
+                        break;
+                    case 4:
                         tab.setText("Logout");
                 }
             }

@@ -19,7 +19,8 @@ public class ProfessorPageAdapter extends FragmentStateAdapter {
             case 1:
                 return new ProfessorDepartmentFragment();
             case 2:
-                return new ApproveUserFragment();
+                return new DocumentApprovalFragment().newInstance();
+
             case 3:
                 return new LogoutFragment();
 

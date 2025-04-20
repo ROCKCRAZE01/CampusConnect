@@ -190,6 +190,64 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_CLUB_CHAT_MESSAGES_TABLE);
 
 
+        String CREATE_DOCUMENT_TYPES_TABLE = "CREATE TABLE IF NOT EXISTS DocumentTypes (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "name TEXT NOT NULL UNIQUE " +
+                ");";
+
+        db.execSQL(CREATE_DOCUMENT_TYPES_TABLE);
+
+//
+        String CREATE_DOCUMENT_APPROVAL_FLOW_TABLE = "CREATE TABLE IF NOT EXISTS DocumentApprovalFlow (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "document_type_id INTEGER, " +
+                "step_number INTEGER, " +
+                "approver_user_id INTEGER NOT NULL, "+
+                "department_scope TEXT, " +
+                "FOREIGN KEY (document_type_id) REFERENCES DocumentTypes(id), " +
+                "FOREIGN KEY (approver_user_id) REFERENCES Users(id) "+
+                ");";
+
+        db.execSQL(CREATE_DOCUMENT_APPROVAL_FLOW_TABLE);
+
+//
+        String CREATE_DOCUMENTS_TABLE = "CREATE TABLE IF NOT EXISTS Documents (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "title TEXT, " +
+                "description TEXT, " +
+                "document_type_id INTEGER, " +
+                "uploaded_by INTEGER, " +
+                "club_id INTEGER, " +
+                "file_path TEXT, " +
+                "status TEXT DEFAULT 'Pending', " +
+                "current_step INTEGER DEFAULT 1, " +
+                "FOREIGN KEY (uploaded_by) REFERENCES Users(id), " +
+                "FOREIGN KEY (document_type_id) REFERENCES DocumentTypes(id), " +
+                "FOREIGN KEY (club_id) REFERENCES Clubs(id)" +
+                ");";
+        db.execSQL(CREATE_DOCUMENTS_TABLE);
+
+//
+
+        String CREATE_DOCUMENT_APPROVALS_TABLE = "CREATE TABLE IF NOT EXISTS DocumentApprovals (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "document_id INTEGER, " +
+                "step_number INTEGER, " +
+                "approver_id INTEGER, " +
+                "status TEXT, " +
+                "comments TEXT, " +
+                "timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+                "FOREIGN KEY (document_id) REFERENCES Documents(id), " +
+                "FOREIGN KEY (approver_id) REFERENCES Users(id)" +
+                ");";
+        db.execSQL(CREATE_DOCUMENT_APPROVALS_TABLE);
+
+
+
+
+
+
+
 
     }
 
@@ -211,7 +269,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    //may cause issue when two people insert document simoultanoeusly
+    public long getLastInsertedDocumentId() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT id FROM Documents ORDER BY id DESC LIMIT 1", null);
+        if (cursor.moveToFirst()) {
+            return cursor.getLong(cursor.getColumnIndex("id"));
+        }
+        return -1;
+    }
 
+    public void insertDocument(String title, String description, int documentTypeId, int clubId, int uploadedBy, String filePath) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("title", title);
+        values.put("description", description);
+        values.put("document_type_id", documentTypeId);
+        values.put("club_id", clubId); // Linking the document to a club
+        values.put("uploaded_by", uploadedBy);
+        values.put("file_path", filePath);
+        values.put("status", "Pending"); // Default status
+        values.put("current_step", 1); // Start at step 1 in the approval flow
+
+        db.insert("Documents", null, values);
+    }
 
 
     public boolean isUserDirector(int userId, int departmentId) {
@@ -701,6 +782,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return clubs;
     }
+
     public String getClubInfo(String clubName) {
         SQLiteDatabase db = this.getReadableDatabase();
         String info = "";
