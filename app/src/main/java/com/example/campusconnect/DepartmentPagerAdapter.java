@@ -18,8 +18,9 @@ public class DepartmentPagerAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         switch (position) {
-            case 0: return new DepartmentInfoFragment(deptId);
+            case 0: return new  DepartmentInfoFragment(deptId);
             case 1: return new CreateSubDepartmentFragment(deptId, userId);
+            case 2: return new DepartmentAnnouncementFragment(deptId, "parent");
             // Add more tabs later
             default: return new Fragment();
         }
@@ -27,7 +28,7 @@ public class DepartmentPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2; // Add more if needed later
+        return 3; // Add more if needed later
     }
 }
 

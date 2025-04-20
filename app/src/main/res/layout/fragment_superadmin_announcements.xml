@@ -27,14 +27,16 @@
             <EditText
                 android:id="@+id/etTitle"
                 android:hint="Enter Title"
+                android:background="@null"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="50dp"/>
 
             <EditText
                 android:id="@+id/etDescription"
                 android:hint="Enter Description"
+                android:background="@null"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="50dp"/>
 
             <!-- Spinner for Target Audience -->
             <TextView
@@ -53,7 +55,8 @@
                 android:id="@+id/etTargetId"
                 android:hint="Enter Target ID (if required)"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:background="@null"
+                android:layout_height="50dp"
                 android:visibility="gone" />
 
             <!-- Visible To Role -->

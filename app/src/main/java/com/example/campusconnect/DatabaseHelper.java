@@ -1,6 +1,6 @@
 package com.example.campusconnect;
 
-
+import com.example.campusconnect.models.ChatMessage;
 
 
 import android.content.ContentValues;
@@ -9,8 +9,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import com.example.campusconnect.models.ChatMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -190,6 +188,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ");";
 
         db.execSQL(CREATE_CLUB_CHAT_MESSAGES_TABLE);
+
 
 
     }
@@ -818,6 +817,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return announcements;
     }
+
     public void insertClubChatMessage(String clubName, int senderId, String message) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -856,6 +856,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return messages;
     }
+
+
+
+
+
 
 
 

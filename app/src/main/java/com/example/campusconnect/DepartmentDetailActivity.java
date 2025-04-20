@@ -35,6 +35,7 @@ public class DepartmentDetailActivity extends AppCompatActivity {
             switch (position) {
                 case 0: tab.setText("Info"); break;
                 case 1: tab.setText("Create SubDept"); break;
+                case 2: tab.setText("Announcements");break;
                 // Future: tab.setText("Something Else");
             }
         }).attach();

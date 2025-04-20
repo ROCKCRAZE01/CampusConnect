@@ -52,13 +52,13 @@ public class CreateDepartmentFragment extends Fragment {
 
         // Set up the spinners
         ArrayAdapter<CharSequence> entityAdapter = ArrayAdapter.createFromResource(
-                getContext(), R.array.entity_array, android.R.layout.simple_spinner_item);
-        entityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                getContext(), R.array.entity_array, R.layout.spinner_item); // use your layout
+        entityAdapter.setDropDownViewResource(R.layout.spinner_item); // for dropdown too
         spinnerEntity.setAdapter(entityAdapter);
 
         ArrayAdapter<CharSequence> operationAdapter = ArrayAdapter.createFromResource(
-                getContext(), R.array.operations_array, android.R.layout.simple_spinner_item);
-        operationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                getContext(), R.array.operations_array, R.layout.spinner_item);
+        operationAdapter.setDropDownViewResource(R.layout.spinner_item);
         spinnerOperation.setAdapter(operationAdapter);
 
         // Handle entity selection

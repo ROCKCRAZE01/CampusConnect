@@ -3,26 +3,29 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/black"
+    android:layout_marginTop="20dp">
 
     <Spinner
         android:id="@+id/spinnerEntity"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="50dp"
+        />
 
     <Spinner
         android:id="@+id/spinnerOperation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="50dp"/>
 
     <LinearLayout
         android:id="@+id/layoutDepartment"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <EditText android:id="@+id/etDeptCode" android:hint="Department Code" android:layout_height="wrap_content" android:layout_width="match_parent"/>
-        <EditText android:id="@+id/etDeptName" android:hint="Department Name" android:layout_height="wrap_content" android:layout_width="match_parent"/>
-        <EditText android:id="@+id/etDirector" android:hint="Director ID" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+        <EditText android:id="@+id/etDeptCode" android:hint="Department Code" android:layout_height="50dp" android:layout_width="match_parent" android:background="@null" android:padding="10dp" android:textColor="@color/white" android:textColorHint="@color/white"/>
+        <EditText android:id="@+id/etDeptName" android:hint="Department Name" android:layout_height="50dp" android:layout_width="match_parent" android:background="@null" android:padding="10dp" android:textColor="@color/white" android:textColorHint="@color/white"/>
+        <EditText android:id="@+id/etDirector" android:hint="Director ID" android:layout_height="50dp" android:layout_width="match_parent" android:background="@null" android:padding="10dp" android:textColor="@color/white" android:textColorHint="@color/white"/>
     </LinearLayout>
 
     <LinearLayout
@@ -30,9 +33,18 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <EditText android:id="@+id/etClubCode" android:hint="Club Code" android:layout_height="wrap_content" android:layout_width="match_parent"/>
-        <EditText android:id="@+id/etClubName" android:hint="Club Name" android:layout_height="wrap_content" android:layout_width="match_parent"/>
-        <EditText android:id="@+id/etFacultyAdvisor" android:hint="Faculty Advisor ID" android:layout_height="wrap_content" android:layout_width="match_parent"/>
+
+        <EditText
+            android:id="@+id/etClubCode"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@null"
+            android:hint="Club Code"
+            android:textColor="@color/white" android:textColorHint="@color/white"
+            android:padding="10dp" />
+
+        <EditText android:id="@+id/etClubName" android:hint="Club Name" android:layout_height="50dp" android:textColor="@color/white" android:textColorHint="@color/white" android:background="@null" android:layout_width="match_parent" android:padding="10dp"/>
+        <EditText android:id="@+id/etFacultyAdvisor" android:hint="Faculty Advisor ID" android:layout_height="50dp" android:background="@null" android:textColor="@color/white" android:textColorHint="@color/white" android:layout_width="match_parent" android:padding="10dp"/>
     </LinearLayout>
 
     <Button android:id="@+id/btnCreate" android:text="Create" android:layout_height="wrap_content" android:layout_width="match_parent"/>
