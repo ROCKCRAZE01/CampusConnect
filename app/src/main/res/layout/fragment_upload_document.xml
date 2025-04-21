@@ -16,6 +16,7 @@
             android:layout_height="wrap_content" />
 
         <EditText
+            android:minHeight="48dp"
             android:id="@+id/etDocumentTitle"
             android:hint="Enter Title"
             android:layout_width="match_parent"
@@ -23,6 +24,7 @@
             android:layout_marginTop="12dp" />
 
         <Spinner
+            android:minHeight="48dp"
             android:id="@+id/spinnerDocumentType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -57,5 +59,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp" />
+        <LinearLayout
+            android:id="@+id/timelineLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp" />
     </LinearLayout>
 </ScrollView>

@@ -1,0 +1,32 @@
+<!-- timeline_step.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginBottom="16dp">
+
+    <!-- Left Line -->
+    <View
+        android:id="@+id/lineLeft"
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:background="@android:color/darker_gray"/>
+
+
+    <!-- Step Circle -->
+    <View
+        android:id="@+id/stepCircle"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/circle_gray" />
+
+    <!-- Right Line -->
+    <View
+        android:id="@+id/lineRight"
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:background="@android:color/darker_gray"/>
+</LinearLayout>
